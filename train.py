@@ -5,10 +5,13 @@ import csv
 from datetime import datetime
 
 import numpy as np
+import keras
 from keras.callbacks import ModelCheckpoint, CSVLogger
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.model_selection import StratifiedKFold
 from sklearn.utils import compute_class_weight
+from sklearn.preprocessing import LabelEncoder
+
 
 import data
 import models
@@ -35,6 +38,8 @@ if __name__ == '__main__':
 
         kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=seed)
         k = 0
+        le = LabelEncoder()
+        Y = le.fit_transform(Y)
         for train, test in kfold.split(X, Y):
             print('X_train shape:', X[train].shape)
             print('y_train shape:', Y[train].shape)
@@ -74,17 +79,17 @@ if __name__ == '__main__':
             csv_logger = CSVLogger(
                 model.name + '-' + dataset + '-' + str(currenttime) + '.csv')
             model_checkpoint = ModelCheckpoint(
-                model.name + '-' + dataset + '-' + str(currenttime) + '.h5',
-                monitor='acc',
-                save_best_only=True)
+                model.name + '-' + dataset + '-' + str(currenttime) + '.keras',
+                monitor='accuracy',
+                save_best_only=True
+)
 
             # train the model
             print('Begin training ...')
-            class_weight = compute_class_weight('balanced', np.unique(Y),
-                                                Y)  # use as optional argument in the fit function
+            class_weight = dict(enumerate(compute_class_weight('balanced', classes=np.unique(Y), y=Y)))
 
             model.fit(X_train_input, Y[train], validation_split=0.2, epochs=epochs, batch_size=64, verbose=1,
-                      callbacks=[csv_logger, model_checkpoint])
+                      callbacks=[csv_logger, model_checkpoint], class_weight=class_weight)
 
             # evaluate the model
             print('Begin testing ...')
@@ -94,7 +99,8 @@ if __name__ == '__main__':
             print('Report:')
             target_names = sorted(dictActivities, key=dictActivities.get)
 
-            classes = model.predict_classes(X_test_input, batch_size=64)
+            # Use predict instead of predict_classes (deprecated)
+            classes = np.argmax(model.predict(X_test_input, batch_size=64), axis=1)
             print(classification_report(list(Y[test]), classes, target_names=target_names))
             print('Confusion matrix:')
             labels = list(dictActivities.values())
