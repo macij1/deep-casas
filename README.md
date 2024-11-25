@@ -1,3 +1,6 @@
+# Refactoring fork
+This refactoring was made in Nov2024 for a Georgia Tech class
+
 # deep-casas
 
 Deep learning and LSTM approaches for human activity recognition.
@@ -23,9 +26,9 @@ If you find this code useful, we encourage you to cite the paper. BibTeX:
 
 The code has been tested on:
 
-* Python 3.5.2
-* Keras 2.1.5
-* TensorFlow 1.3.0
+* Python 3.11
+* Keras 3.6.0
+* TensorFlow 2.18.0
 
 ## Data
 
