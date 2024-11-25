@@ -159,7 +159,8 @@ mappingActivities = {"cairo": {"": "Other",
                                "Guest_Bathroom": "Bathing"},
                      }
 
-datasets = ["./dataset/cairo", "./dataset/kyoto7", "./dataset/kyoto8", "./dataset/kyoto11", "./dataset/milan"]
+#datasets = ["./dataset/cairo", "./dataset/kyoto7", "./dataset/kyoto8", "./dataset/kyoto11", "./dataset/milan"]
+datasets = ["./dataset/cairo"]
 datasetsNames = [i.split('/')[-1] for i in datasets]
 
 
@@ -299,6 +300,9 @@ if __name__ == '__main__':
         X = np.array(X, dtype=object)
         Y = np.array(Y, dtype=object)
 
+        for item in Y:
+            print(item)
+
         X = sequence.pad_sequences(X, maxlen=max_lenght, dtype='int32')
         if not os.path.exists('npy'):
             os.makedirs('npy')
@@ -309,7 +313,7 @@ if __name__ == '__main__':
 
 
 def getData(datasetName):
-    X = np.load('./npy/' + datasetName + '-x.npy')
-    Y = np.load('./npy/' + datasetName + '-y.npy')
-    dictActivities = np.load('./npy/' + datasetName + '-labels.npy').item()
+    X = np.load('./npy/' + datasetName + '-x.npy', allow_pickle=True)
+    Y = np.load('./npy/' + datasetName + '-y.npy', allow_pickle=True)
+    dictActivities = np.load('./npy/' + datasetName + '-labels.npy', allow_pickle=True).item()
     return X, Y, dictActivities
