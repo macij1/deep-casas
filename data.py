@@ -160,7 +160,7 @@ mappingActivities = {"cairo": {"": "Other",
                      }
 
 #datasets = ["./dataset/cairo", "./dataset/kyoto7", "./dataset/kyoto8", "./dataset/kyoto11", "./dataset/milan"]
-datasets = ["./dataset/cairo", "./dataset/milan", "./dataset/aruba"]
+datasets = ["./dataset/cairo", "./dataset/milan"]
 datasetsNames = [i.split('/')[-1] for i in datasets]
 
 
