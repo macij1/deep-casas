@@ -14,6 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 import data
+import data_virtual_timeline
 import models
 
 # fix random seed for reproducibility
@@ -26,12 +27,25 @@ if __name__ == '__main__':
     # set and parse the arguments list
     p = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description='')
     p.add_argument('--v', dest='model', action='store', default='', help='deep model')
+    p.add_argument('--t', dest='timeline', action='store', default='', help='deep model')
     args = p.parse_args()
+    
+    datasets = data.datasetsNames
+    print("Datasets: " + str(datasets))
 
-    print(data.datasetsNames)
-    for dataset in data.datasetsNames:
-        X, Y, dictActivities = data.getData(dataset)
-
+    for dataset in datasets:
+        # Mode can be virtual or not
+        args_timeline = str(args.timeline)
+        if args_timeline == 'virtual':
+            print("Virtual Timeline")
+            X, Y, dictActivities = data_virtual_timeline.getData(dataset)
+            max_length = data_virtual_timeline.max_length
+        else:
+            print("Real Timeline")
+            X, Y, dictActivities= data.getData(dataset)
+            max_length = data.max_length
+        
+        
         cvaccuracy = []
         cvscores = []
         modelname = ''
@@ -48,6 +62,7 @@ if __name__ == '__main__':
             args_model = str(args.model)
 
             if 'Ensemble' in args_model:
+                print("Ensemble")
                 input_dim = len([X[train], X[train]])
                 X_train_input = [X[train], X[train]]
                 X_test_input = [X[test], X[test]]
@@ -58,15 +73,15 @@ if __name__ == '__main__':
             no_activities = len(dictActivities)
 
             if args_model == 'LSTM':
-                model = models.get_LSTM(input_dim, units, data.max_lenght, no_activities)
+                model = models.get_LSTM(input_dim, units, max_length, no_activities)
             elif args_model == 'biLSTM':
-                model = models.get_biLSTM(input_dim, units, data.max_lenght, no_activities)
+                model = models.get_biLSTM(input_dim, units, max_length, no_activities)
             elif args_model == 'Ensemble2LSTM':
-                model = models.get_Ensemble2LSTM(input_dim, units, data.max_lenght, no_activities)
+                model = models.get_Ensemble2LSTM(input_dim, units, max_length, no_activities)
             elif args_model == 'CascadeEnsembleLSTM':
-                model = models.get_CascadeEnsembleLSTM(input_dim, units, data.max_lenght, no_activities)
+                model = models.get_CascadeEnsembleLSTM(input_dim, units, max_length, no_activities)
             elif args_model == 'CascadeLSTM':
-                model = models.get_CascadeLSTM(input_dim, units, data.max_lenght, no_activities)
+                model = models.get_CascadeLSTM(input_dim, units, max_length, no_activities)
             else:
                 print('Please get the model name '
                       '(eg. --v [LSTM | biLSTM | Ensemble2LSTM | CascadeEnsembleLSTM | CascadeLSTM])')
@@ -75,6 +90,7 @@ if __name__ == '__main__':
             model = models.compileModel(model)
             modelname = model.name
 
+
             currenttime = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
             csv_logger = CSVLogger(
                 model.name + '-' + dataset + '-' + str(currenttime) + '.csv')
@@ -82,7 +98,7 @@ if __name__ == '__main__':
                 model.name + '-' + dataset + '-' + str(currenttime) + '.keras',
                 monitor='accuracy',
                 save_best_only=True
-)
+            )
 
             # train the model
             print('Begin training ...')
@@ -102,9 +118,19 @@ if __name__ == '__main__':
             # Use predict instead of predict_classes (deprecated)
             classes = np.argmax(model.predict(X_test_input, batch_size=64), axis=1)
             print(classification_report(list(Y[test]), classes, target_names=target_names))
-            print('Confusion matrix:')
-            labels = list(dictActivities.values())
-            print(confusion_matrix(list(Y[test]), classes, labels))
+
+            # Get unique labels from the test set
+            unique_labels = np.unique(Y[test])
+
+            # Compute confusion matrix
+            cm = confusion_matrix(list(Y[test]), classes, labels=unique_labels)
+            print("Confusion Matrix:")
+            print(cm)
+
+            # If you want to print with activity names
+            print("\nConfusion Matrix with Activity Names:")
+            target_names = [key for key, value in sorted(dictActivities.items(), key=lambda item: item[1]) if value in unique_labels]
+            print("Activities:", target_names)
 
             cvaccuracy.append(scores[1] * 100)
             cvscores.append(scores)
