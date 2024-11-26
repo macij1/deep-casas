@@ -13,7 +13,7 @@ import numpy as np
 from keras.preprocessing import sequence
 
 offset = 20
-max_lenght = 2000
+max_length = 32
 
 cookActivities = {"cairo": {"Other": offset,
                             "Work": offset + 1,
@@ -163,8 +163,7 @@ mappingActivities = {"cairo": {"": "Other",
                      }
 
 #datasets = ["./dataset/cairo", "./dataset/kyoto7", "./dataset/kyoto8", "./dataset/kyoto11", "./dataset/milan"]
-datasets = ["./dataset/cairo"]
-
+datasets = ["./dataset/cairo", "./dataset/milan"]
 datasetsNames = [i.split('/')[-1] for i in datasets]
 
 
@@ -331,10 +330,10 @@ if __name__ == '__main__':
 
         print(Counter(Y))
 
-        X = np.array(X, dtype=object)
-        Y = np.array(Y, dtype=object)
+        X = np.array(X, dtype='int32')
+        Y = np.array(Y, dtype='int32')
 
-        ## X = sequence.pad_sequences(X, maxlen=max_lenght, dtype='int32')
+        ## X = sequence.pad_sequences(X, maxlen=max_length, dtype='int32')
         if not os.path.exists('npy'):
             os.makedirs('npy')
 
@@ -345,7 +344,7 @@ if __name__ == '__main__':
         print("\n\n\nSensor buffer:",  dictSensors)
         
         print("\nTrigger rate per window:" + str(w) + "\n")
-        for i in range(200, 400): # Peak
+        for i in range(0, 20): # Peak
             print(X[i])
             print(Y[i])
             print("\n")
@@ -353,7 +352,7 @@ if __name__ == '__main__':
 
 
 def getData(datasetName):
-    X = np.load('./npy/' + datasetName + '-x.npy')
-    Y = np.load('./npy/' + datasetName + '-y.npy')
-    dictActivities = np.load('./npy/' + datasetName + '-labels.npy').item()
+    X = np.load('./npy/' + datasetName + 'virtual-x.npy', allow_pickle=True)
+    Y = np.load('./npy/' + datasetName + 'virtual-y.npy', allow_pickle=True)
+    dictActivities = np.load('./npy/' + datasetName + 'virtual-labels.npy', allow_pickle=True).item()
     return X, Y, dictActivities
