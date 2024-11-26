@@ -10,7 +10,7 @@ import numpy as np
 from keras.preprocessing import sequence
 
 offset = 20
-max_lenght = 2000
+max_length = 2000
 
 cookActivities = {"cairo": {"Other": offset,
                             "Work": offset + 1,
@@ -160,7 +160,7 @@ mappingActivities = {"cairo": {"": "Other",
                      }
 
 #datasets = ["./dataset/cairo", "./dataset/kyoto7", "./dataset/kyoto8", "./dataset/kyoto11", "./dataset/milan"]
-datasets = ["./dataset/cairo"]
+datasets = ["./dataset/cairo", "./dataset/milan", "./dataset/aruba"]
 datasetsNames = [i.split('/')[-1] for i in datasets]
 
 
@@ -300,10 +300,10 @@ if __name__ == '__main__':
         X = np.array(X, dtype=object)
         Y = np.array(Y, dtype=object)
 
-        for item in Y:
+        for item in X:
             print(item)
 
-        X = sequence.pad_sequences(X, maxlen=max_lenght, dtype='int32')
+        X = sequence.pad_sequences(X, maxlen=max_length, dtype='int32')
         if not os.path.exists('npy'):
             os.makedirs('npy')
 
