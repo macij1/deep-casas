@@ -20,7 +20,7 @@ import models
 # fix random seed for reproducibility
 seed = 7
 units = 64
-epochs = 200
+epochs = 50
 
 if __name__ == '__main__':
     """The entry point"""
@@ -71,6 +71,11 @@ if __name__ == '__main__':
                 X_train_input = X[train]
                 X_test_input = X[test]
             no_activities = len(dictActivities)
+            print("Input_dim: "+str(input_dim))
+            print("X_train_input: "+str(X_train_input))
+            print("X_test_input: "+str(X_test_input))
+            print("Number of activities: "+str(no_activities))
+
 
             if args_model == 'LSTM':
                 model = models.get_LSTM(input_dim, units, max_length, no_activities)
